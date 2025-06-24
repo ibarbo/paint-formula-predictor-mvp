@@ -1,0 +1,95 @@
+# Gitignore for paint_predictor_mvp project
+
+# ------------------------------------
+# Python specific ignores
+# ------------------------------------
+# Virtual environment directory
+venv/
+env/
+.venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+*.egg-info/
+.pytest_cache/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+eggs/
+*.egg
+parts/
+sdist/
+var/
+wheels/
+*.whl
+
+# PyInstaller / cx_Freeze / py2app
+*.spec
+
+# Jupyter / IPython
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+
+# VS Code environment files
+.vscode/
+
+# Project specific data files
+# These are your simulated data files that can be regenerated
+# If you want to track them, comment these lines out.
+# For now, it's good practice not to commit large data files or generated ones.
+simulated_paint_formulas.csv
+simulated_paint_formulas_advanced.csv
+simulated_paint_formulas_challenges.csv
+
+# Saved machine learning models
+# These are usually large binary files and can be regenerated from training data
+# It's better to manage them with DVC (Data Version Control) or similar tools,
+# or simply regenerate them during deployment.
+*.pkl
+*.joblib
+*.h5 # For Keras/TensorFlow models
+models/ # If you store models in a dedicated 'models' folder
+
+# Logs and databases
+*.log
+*.db
+*.sqlite
+sqlite3.db
+
+# Environment variables / API keys (if you add them later)
+.env
+.flaskenv
+
+# ------------------------------------
+# Node.js / React specific ignores (for your frontend)
+# ------------------------------------
+# Dependency directories
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-store/
+
+# Production build files
+build/
+dist/
+out/
+
+# IDE specific files
+.idea/ # IntelliJ IDEA, WebStorm, etc.
+.DS_Store # macOS specific
+Thumbs.db # Windows specific
+
+# Other common build artifacts
+coverage/
+.next/ # Next.js specific
+.parcel-cache/ # Parcel specific
+*.css.map
+*.js.map
