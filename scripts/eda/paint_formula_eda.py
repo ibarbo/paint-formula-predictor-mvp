@@ -10,7 +10,7 @@ plt.rcParams['figure.figsize'] = (10, 6)
 plt.rcParams['figure.dpi'] = 100
 
 # Carga el dataset (asegúrate de que el nombre del archivo sea correcto)
-df = pd.read_csv('simulated_paint_formulas_with_engineered_features.csv')
+df = pd.read_csv('data/processed/simulated_paint_formulas_with_engineered_features.csv')
 
 print("--- Exploratory Data Analysis (EDA) ---")
 

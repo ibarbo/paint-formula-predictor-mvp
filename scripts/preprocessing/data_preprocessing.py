@@ -9,7 +9,7 @@ from imblearn.over_sampling import SMOTE # Asegúrate de haber instalado: pip in
 # Cargamos nuestro dataset que ya incluye las características de ingeniería.
 print("--- Fase 3: Preprocesamiento de Datos ---")
 print("Cargando el dataset 'simulated_paint_formulas_with_engineered_features.csv'...")
-df = pd.read_csv('simulated_paint_formulas_with_engineered_features.csv')
+df = pd.read_csv('data/processed/simulated_paint_formulas_with_engineered_features.csv')
 print("Dataset cargado exitosamente.\n")
 
 # --- 2. Separación de Características (X) y Variable Objetivo (y) ---
@@ -119,9 +119,15 @@ print("\nBalanceo de clases completado para el conjunto de entrenamiento.\n")
 print("--- Preprocesamiento de Datos Completo ---")
 print("El dataset está ahora listo para el entrenamiento del modelo de Machine Learning.")
 
-# Puedes guardar los conjuntos preprocesados si lo deseas, aunque para este workflow
-# es común pasarlos directamente a la fase de Modelado.
-# X_train_resampled.to_csv('X_train_preprocessed.csv', index=False)
-# y_train_resampled.to_csv('y_train_resampled.csv', index=False)
-# X_test.to_csv('X_test_preprocessed.csv', index=False)
-# y_test.to_csv('y_test.csv', index=False)
+print("\n--- Guardando datos preprocesados para uso futuro ---")
+# Asegúrate de que la carpeta 'data/processed' exista
+import os
+output_dir = 'data/processed' # Ruta relativa desde scripts/preprocessing/
+os.makedirs(output_dir, exist_ok=True)
+
+X_train_resampled.to_csv(os.path.join(output_dir, 'X_train_resampled.csv'), index=False)
+y_train_resampled.to_csv(os.path.join(output_dir, 'y_train_resampled.csv'), index=False)
+X_test.to_csv(os.path.join(output_dir, 'X_test_preprocessed.csv'), index=False)
+y_test.to_csv(os.path.join(output_dir, 'y_test.csv'), index=False)
+print(f"Datos guardados exitosamente en: {output_dir}\n")
+

@@ -32,16 +32,19 @@ print("Simulando carga de datos preprocesados...")
 # --- Este bloque de código es solo para que este script sea autónomo si se ejecuta solo ---
 # --- En un flujo de trabajo continuo (ej. Jupyter), simplemente usarías las variables ya existentes ---
 try:
-    # Intenta cargar los datos si se guardaron en CSVs (opcional, si los guardaste)
-    X_train_resampled = pd.read_csv('X_train_resampled.csv')
-    y_train_resampled = pd.read_csv('y_train_resampled.csv').squeeze() # .squeeze() para Series
-    X_test = pd.read_csv('X_test_preprocessed.csv')
-    y_test = pd.read_csv('y_test.csv').squeeze() # .squeeze() para Series
+    # Cargar los datos preprocesados desde la nueva ubicación
+    # ¡Importante! La ruta es relativa a la raíz del proyecto si lanzas el script desde la raíz,
+    # o relativa a la ubicación del script de modelado si lo lanzas desde esa carpeta.
+    # Dado que ahora el script está en scripts/modeling, la ruta a data/processed es '../../data/processed'
+    X_train_resampled = pd.read_csv('data/processed/X_train_resampled.csv') 
+    y_train_resampled = pd.read_csv('data/processed/y_train_resampled.csv').squeeze() # .squeeze() para Series
+    X_test = pd.read_csv('data/processed/X_test_preprocessed.csv')
+    y_test = pd.read_csv('data/processed/y_test.csv').squeeze() # .squeeze() para Series
     print("Datos preprocesados cargados desde archivos CSV (simulación).\n")
 except FileNotFoundError:
     print("Archivos de datos preprocesados no encontrados. Ejecutando el preprocesamiento completo para generar los datos.")
     # Si no se encuentran los archivos, ejecuta el preprocesamiento (copia del código anterior)
-    df = pd.read_csv('simulated_paint_formulas_with_engineered_features.csv')
+    df = pd.read_csv('data/processed/simulated_paint_formulas_with_engineered_features.csv') # para el bloque try/except
     TARGET_COLUMN = 'IsSuccess'
     X = df.drop(columns=[TARGET_COLUMN])
     y = df[TARGET_COLUMN]
@@ -267,8 +270,8 @@ plt.show()
 # del bosque. Las características que consistentemente reducen más la impureza en los nodos
 # de los árboles son consideradas más importantes.
 print("## 4. Importancia de Características (Random Forest)\n")
+feature_names = X_test.columns # Usamos X_test para obtener los nombres de las columnas preprocesadas
 feature_importances = rf_model.feature_importances_
-feature_names = X_preprocessed.columns
 importance_df = pd.DataFrame({'Feature': feature_names, 'Importance': feature_importances})
 importance_df = importance_df.sort_values(by='Importance', ascending=False)
 

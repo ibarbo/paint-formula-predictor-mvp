@@ -357,5 +357,5 @@ print(df_temp_for_sum['CalculatedTotalPercentage'].describe())
 
 
 # Guardar el dataset en un archivo CSV
-df.to_csv('simulated_paint_formulas_with_engineered_features.csv', index=False)
+df.to_csv('data/processed/simulated_paint_formulas_with_engineered_features.csv', index=False)
 print("\nDataset con desafíos y características de ingeniería guardado como 'simulated_paint_formulas_with_engineered_features.csv'")
