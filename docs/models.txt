@@ -1,0 +1,88 @@
+--- Fase 4: Modelado de Machine Learning ---
+Simulando carga de datos preprocesados...
+Archivos de datos preprocesados no encontrados. Ejecutando el preprocesamiento completo para generar los datos.
+Preprocesamiento completo ejecutado para generar los datos.
+
+## 1. Modelo: Regresión Logística
+
+Entrenando el modelo de Regresión Logística...
+Entrenamiento de Regresión Logística completado.
+
+Predicciones realizadas en el conjunto de prueba.
+
+### 1.3 Evaluación de Regresión Logística
+
+--- Reporte de Clasificación (Regresión Logística) ---
+              precision    recall  f1-score   support
+
+           0       0.83      0.58      0.68       807
+           1       0.22      0.51      0.31       193
+
+    accuracy                           0.57      1000
+   macro avg       0.53      0.54      0.50      1000
+weighted avg       0.71      0.57      0.61      1000
+
+
+
+--- Matriz de Confusión (Regresión Logística) ---
+[[468 339]
+ [ 95  98]]
+
+
+--- AUC-ROC (Regresión Logística): 0.5485 ---
+
+
+
+## 2. Modelo: Random Forest Classifier
+
+Entrenando el modelo Random Forest...
+Entrenamiento de Random Forest completado.
+
+Predicciones realizadas en el conjunto de prueba.
+
+### 2.3 Evaluación de Random Forest
+
+--- Reporte de Clasificación (Random Forest) ---
+              precision    recall  f1-score   support
+
+           0       0.80      0.97      0.88       807
+           1       0.00      0.00      0.00       193
+
+    accuracy                           0.79      1000
+   macro avg       0.40      0.49      0.44      1000
+weighted avg       0.65      0.79      0.71      1000
+
+
+
+--- Matriz de Confusión (Random Forest) ---
+[[786  21]
+ [193   0]]
+
+
+--- AUC-ROC (Random Forest): 0.4803 ---
+
+
+
+## 3. Comparación de Modelos: Curvas ROC
+
+## 4. Importancia de Características (Random Forest)
+
+--- Top 10 Características Más Importantes (Random Forest) ---
+                              Feature  Importance
+43    Defoamer_Supplier_SupplierW_Add    0.062794
+40   Thickener_Supplier_SupplierT_Add    0.057080
+42    Defoamer_Supplier_SupplierV_Add    0.056575
+38  Dispersant_Supplier_SupplierR_Add    0.054341
+39  Dispersant_Supplier_SupplierS_Add    0.048859
+6               Dispersant_Percentage    0.047383
+41   Thickener_Supplier_SupplierU_Add    0.046751
+8                 Defoamer_Percentage    0.044603
+7                Thickener_Percentage    0.034084
+5                         HidingPower    0.026888
+C:\Users\Víctor\Documents\paint_predictor_mvp\paint_formula_modeling.py:279: FutureWarning: 
+
+Passing `palette` without assigning `hue` is deprecated and will be removed in v0.14.0. Assign the `y` variable to `hue` and set `legend=False` for the same effect.
+
+  sns.barplot(x='Importance', y='Feature', data=importance_df.head(15), palette='viridis')
+
+--- Fase 4: Modelado de Machine Learning Completado ---
