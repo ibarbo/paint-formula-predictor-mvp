@@ -1,0 +1,91 @@
+--- Búsqueda de Hiperparámetros Completada ---
+Mejores hiperparámetros encontrados: {'classifier__colsample_bytree': 1.0, 'classifier__gamma': 0.2, 'classifier__learning_rate': 0.2, 'classifier__max_depth': 9, 'classifier__n_estimators': 100, 'classifier__subsample': 0.9}
+Mejor score de AUC-ROC en validación cruzada: 0.5187
+
+## 3. Evaluación del Modelo XGBoost Optimizado
+
+
+--- Reporte de Clasificación (XGBoost Optimizado) ---
+              precision    recall  f1-score   support
+
+       Falla       0.80      0.87      0.83       807
+       Éxito       0.16      0.11      0.13       193
+
+    accuracy                           0.72      1000
+   macro avg       0.48      0.49      0.48      1000
+weighted avg       0.68      0.72      0.70      1000
+
+
+--- Matriz de Confusión (XGBoost Optimizado) ---
+
+--- AUC-ROC (XGBoost Optimizado): 0.4787 ---
+
+
+--- Verificación de Clases Reales en y_test ---
+IsSuccess
+0    807
+1    193
+Name: count, dtype: int64
+
+--- Verificación de Clases Predichas por el Modelo Optimizado ---
+0    872
+1    128
+Name: count, dtype: int64
+
+--- Distribución de Probabilidades Predichas para la clase 'Éxito' ---
+0     0.782605
+1     0.233484
+2     0.018187
+3     0.081457
+4     0.017822
+5     0.158108
+6     0.009645
+7     0.133977
+8     0.567704
+9     0.046202
+10    0.006933
+11    0.581977
+12    0.533711
+13    0.020029
+14    0.023401
+15    0.030375
+16    0.756777
+17    0.041535
+18    0.298226
+19    0.100244
+dtype: float32
+Probabilidad mínima predicha para 'Éxito': 0.0002
+Probabilidad máxima predicha para 'Éxito': 0.9774
+Probabilidad promedio predicha para 'Éxito': 0.2083
+
+## 4. Importancia de Características (XGBoost Optimizado)
+
+Importancia de características según XGBoost Optimizado (Tipo: Ganancia):
+
+                              feature  importance
+42    Defoamer_Supplier_SupplierW_Add  108.557594
+38  Dispersant_Supplier_SupplierS_Add   81.799759
+40   Thickener_Supplier_SupplierU_Add   72.207962
+41    Defoamer_Supplier_SupplierV_Add   13.084361
+29  PigmentSupplier_SupplierL_Pigment   12.642220
+37  Dispersant_Supplier_SupplierR_Add   12.301442
+26  PigmentSupplier_SupplierI_Pigment   11.714361
+35  SolventSupplier_SupplierP_Solvent   11.602098
+34  SolventSupplier_SupplierO_Solvent   10.383669
+24  PigmentSupplier_SupplierG_Pigment    9.829927
+27  PigmentSupplier_SupplierJ_Pigment    9.747864
+18      ResinSupplier_SupplierD_Resin    9.049518
+25  PigmentSupplier_SupplierH_Pigment    9.039668
+19      ResinSupplier_SupplierE_Resin    8.921484
+39   Thickener_Supplier_SupplierT_Add    8.667000
+C:\Users\Víctor\Documents\paint_predictor_mvp\scripts\modeling\paint_formula_xgboost_modeling.py:156: FutureWarning: 
+
+Passing `palette` without assigning `hue` is deprecated and will be removed in v0.14.0. Assign the `y` variable to `hue` and set `legend=False` for the same effect.
+
+  sns.barplot(x='importance', y='feature', data=feature_importances_xgb_df.head(15), palette='viridis')
+
+--- Guardando el modelo XGBoost optimizado ---
+Modelo optimizado guardado en: models/xgboost/xgb_model_optimized.joblib
+
+
+--- Proceso de Modelado y Optimización con XGBoost Completado ---

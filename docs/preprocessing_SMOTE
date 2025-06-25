@@ -1,0 +1,95 @@
+PS C:\Users\Víctor\Documents\paint_predictor_mvp> python scripts/modeling/paint_formula_modeling.py
+--- Fase 4: Modelado y Optimización ---
+Intentando cargar datos preprocesados desde 'data/processed/'...
+Archivos de datos preprocesados no encontrados en 'data/processed/'.
+Asegúrate de ejecutar primero 'scripts/preprocessing/data_preprocessing.py' desde la raíz del proyecto,
+y que guarde 'X_train_preprocessed.csv' y 'y_train.csv' además de los resampleados.
+PS C:\Users\Víctor\Documents\paint_predictor_mvp> python scripts/preprocessing/data_preprocessing.py 
+--- Fase 3: Preprocesamiento de Datos ---
+Cargando el dataset 'simulated_paint_formulas_with_engineered_features.csv'...
+Dataset cargado exitosamente.
+
+Dimensiones de X (Características): (5000, 24)
+Dimensiones de y (Variable Objetivo): (5000,)
+Variable objetivo identificada como 'IsSuccess'.
+
+Columnas Numéricas (12): ['ResinPercentage', 'PigmentPercentage', 'SolventPercentage', 'Gloss', 'Viscosity', 'HidingPower', 'Dispersant_Percentage', 'Thickener_Percentage', 'Defoamer_Percentage', 'TotalSolidsContent', 'SimulatedPVC', 'SolventToResinRatio']
+Columnas Categóricas (12): ['ResinType', 'ResinSupplier', 'PigmentType', 'PigmentSupplier', 'SolventType', 'SolventSupplier', 'Dispersant_Supplier', 'Thickener_Supplier', 'Defoamer_Supplier', 'Resin_Pigment_Combo', 'Resin_Solvent_Combo', 'Pigment_Solvent_Combo']
+
+Iniciando imputación de datos faltantes...
+Imputación completada. Verificando NaNs restantes:
+Número total de NaNs en X después de imputación: 0
+
+Iniciando codificación One-Hot de variables categóricas...
+Dimensiones de X después de la codificación: (5000, 71)
+Codificación One-Hot completada. Primeras filas del DataFrame preprocesado:
+    ResinPercentage  ...  Pigment_Solvent_Combo_Titanium Dioxide_Xylene
+0            46.64  ...                                            0.0
+1            45.91  ...                                            0.0
+2            51.23  ...                                            0.0
+3            49.91  ...                                            0.0
+4            49.34  ...                                            0.0
+
+[5 rows x 71 columns]
+
+
+Iniciando escalado de características numéricas (StandardScaler)...
+Escalado completado. Resumen estadístico de columnas numéricas escaladas (media ~0, std ~1):
+        ResinPercentage  PigmentPercentage  ...  SimulatedPVC  SolventToResinRatio
+count     5.000000e+03       5.000000e+03  ...  5.000000e+03         5.000000e+03
+mean      1.293188e-15      -1.521272e-15  ... -3.371525e-16        -2.380318e-17
+std       1.000100e+00       1.000100e+00  ...  1.000100e+00         1.000100e+00
+min      -2.918858e+00      -2.617505e+00  ... -2.629225e+00        -2.046357e+00
+25%      -6.786696e-01      -7.090206e-01  ... -7.448824e-01        -7.751437e-01
+50%      -2.485899e-02      -8.015772e-03  ...  1.085662e-02        -3.360241e-02
+75%       6.492248e-01       7.034104e-01  ...  7.196748e-01         7.079389e-01
+max       3.439323e+00       3.143380e+00  ...  2.721007e+00         2.614759e+00
+
+[8 rows x 12 columns]
+Primeras filas del DataFrame preprocesado (valores numéricos escalados):
+    ResinPercentage  ...  Pigment_Solvent_Combo_Titanium Dioxide_Xylene
+0        -0.663465  ...                                            0.0
+1        -0.848458  ...                                            0.0
+2         0.499710  ...                                            0.0
+3         0.165202  ...                                            0.0
+4         0.020756  ...                                            0.0
+
+[5 rows x 71 columns]
+
+
+Dividiendo el dataset en conjuntos de entrenamiento y prueba (80/20)...
+Dimensiones de X_train: (4000, 71)
+Dimensiones de X_test: (1000, 71)
+Dimensiones de y_train: (4000,)
+Dimensiones de y_test: (1000,)
+
+Proporción de Éxito en y_train antes de balanceo:
+IsSuccess
+0    0.807
+1    0.193
+Name: proportion, dtype: float64
+
+Proporción de Éxito en y_test:
+IsSuccess
+0    0.807
+1    0.193
+Name: proportion, dtype: float64
+
+
+Aplicando SMOTE para balancear las clases en el conjunto de ENTRENAMIENTO...
+Dimensiones de X_train después de SMOTE: (6456, 71)
+Dimensiones de y_train después de SMOTE: (6456,)
+
+Proporción de Éxito en y_train_resampled (después de SMOTE):
+IsSuccess
+1    0.5
+0    0.5
+Name: proportion, dtype: float64
+
+Balanceo de clases completado para el conjunto de entrenamiento.
+
+--- Preprocesamiento de Datos Completo ---
+El dataset está ahora listo para el entrenamiento del modelo de Machine Learning.
+
+--- Guardando datos preprocesados para uso futuro ---
+Datos guardados exitosamente en: data/processed

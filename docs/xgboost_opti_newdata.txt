@@ -1,0 +1,79 @@
+--- Búsqueda de Hiperparámetros Completada ---
+Mejores hiperparámetros encontrados: {'classifier__colsample_bytree': 1.0, 'classifier__gamma': 0.2, 'classifier__learning_rate': 0.05, 'classifier__max_depth': 5, 'classifier__n_estimators': 300, 'classifier__subsample': 1.0}
+Mejor score de AUC-ROC en validación cruzada: 0.9461
+
+## 3. Evaluación del Modelo XGBoost Optimizado (Umbral Por Defecto)
+
+
+--- Reporte de Clasificación (XGBoost Optimizado - Umbral Por Defecto) ---
+              precision    recall  f1-score   support
+
+       Falla       0.98      0.87      0.92      2159
+       Éxito       0.74      0.96      0.84       841
+
+    accuracy                           0.90      3000
+   macro avg       0.86      0.91      0.88      3000
+weighted avg       0.91      0.90      0.90      3000
+
+
+--- Matriz de Confusión (XGBoost Optimizado - Umbral Por Defecto) ---
+
+--- AUC-ROC (XGBoost Optimizado - Umbral Por Defecto): 0.9439 ---
+
+
+--- Verificación de Clases Reales en y_test ---
+IsSuccess
+0    2159
+1     841
+Name: count, dtype: int64
+
+--- Verificación de Clases Predichas por el Modelo Optimizado (Umbral Por Defecto) ---
+0    1916
+1    1084
+Name: count, dtype: int64
+
+--- Distribución de Probabilidades Predichas para la clase 'Éxito' ---
+0     0.002685
+1     0.557952
+2     0.766977
+3     0.898980
+4     0.390556
+5     0.829152
+6     0.966891
+7     0.037054
+8     0.077666
+9     0.090720
+10    0.116442
+11    0.806373
+12    0.982121
+13    0.819028
+14    0.022980
+15    0.820050
+16    0.839782
+17    0.018420
+18    0.039959
+19    0.847507
+dtype: float32
+Probabilidad mínima predicha para 'Éxito': 0.0002
+Probabilidad máxima predicha para 'Éxito': 0.9955
+Probabilidad promedio predicha para 'Éxito': 0.3527
+
+## 4. Ajuste del Umbral de Clasificación para la Clase 'Éxito'
+
+Buscando el umbral óptimo para maximizar el F1-score de la clase 'Éxito'...
+Mejor F1-score para la clase 'Éxito': 0.8384 en el umbral: 0.4667
+
+--- Reporte de Clasificación (XGBoost Optimizado - Umbral Ajustado a 0.4667) ---
+              precision    recall  f1-score   support
+
+       Falla       0.98      0.87      0.92      2159
+       Éxito       0.74      0.97      0.84       841
+
+    accuracy                           0.90      3000
+   macro avg       0.86      0.92      0.88      3000
+weighted avg       0.92      0.90      0.90      3000
+
+
+--- Matriz de Confusión (XGBoost Optimizado - Umbral Ajustado a 0.4667) ---
+
+## 5. Importancia de Características (XGBoost Optimizado)

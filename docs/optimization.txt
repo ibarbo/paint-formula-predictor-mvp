@@ -1,0 +1,57 @@
+--- Búsqueda de Hiperparámetros Completada ---
+Mejores hiperparámetros encontrados: {'bootstrap': False, 'max_depth': None, 'max_features': 'log2', 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 300}
+Mejor score de AUC-ROC en validación cruzada: 0.9657
+
+## 3. Evaluación del Modelo Random Forest Optimizado
+
+
+--- Reporte de Clasificación (Random Forest Optimizado) ---
+              precision    recall  f1-score   support
+
+       Falla       0.80      0.97      0.88       807
+       Éxito       0.00      0.00      0.00       193
+
+    accuracy                           0.78      1000
+   macro avg       0.40      0.49      0.44      1000
+weighted avg       0.65      0.78      0.71      1000
+
+
+--- Matriz de Confusión (Random Forest Optimizado) ---
+
+--- AUC-ROC (Random Forest Optimizado): 0.4493 ---
+
+
+## 4. Comparación de Modelos: Curvas ROC
+
+
+## 5. Importancia de Características (Random Forest Optimizado)
+
+Importancia de características según Random Forest Optimizado:
+
+                              feature  importance
+4                           Viscosity    0.045968
+6               Dispersant_Percentage    0.044117
+0                     ResinPercentage    0.043932
+10                       SimulatedPVC    0.043798
+5                         HidingPower    0.043528
+1                   PigmentPercentage    0.043527
+3                               Gloss    0.043242
+9                  TotalSolidsContent    0.042600
+2                   SolventPercentage    0.042546
+8                 Defoamer_Percentage    0.039511
+11                SolventToResinRatio    0.039263
+7                Thickener_Percentage    0.035044
+42    Defoamer_Supplier_SupplierV_Add    0.030114
+43    Defoamer_Supplier_SupplierW_Add    0.029662
+39  Dispersant_Supplier_SupplierS_Add    0.029654
+C:\Users\Víctor\Documents\paint_predictor_mvp\scripts\modeling\paint_formula_modeling.py:152: FutureWarning: 
+
+Passing `palette` without assigning `hue` is deprecated and will be removed in v0.14.0. Assign the `y` variable to `hue` and set `legend=False` for the same effect.
+
+  sns.barplot(x='importance', y='feature', data=feature_importances_optimized_df.head(15), palette='viridis')
+
+--- Guardando el modelo Random Forest optimizado ---
+Modelo optimizado guardado en: models/random_forest/rf_model_optimized.joblib
+
+
+--- Proceso de Modelado y Optimización Completado ---

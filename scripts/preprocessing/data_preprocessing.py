@@ -1,133 +1,134 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from imblearn.over_sampling import SMOTE # Asegúrate de haber instalado: pip install imbalanced-learn
+from imblearn.over_sampling import SMOTE
+import os
+import joblib
 
-# --- 1. Carga del Dataset ---
-# Cargamos nuestro dataset que ya incluye las características de ingeniería.
 print("--- Fase 3: Preprocesamiento de Datos ---")
+
+# --- Paso 1: Carga de Datos Iniciales ---
 print("Cargando el dataset 'simulated_paint_formulas_with_engineered_features.csv'...")
-df = pd.read_csv('data/processed/simulated_paint_formulas_with_engineered_features.csv')
-print("Dataset cargado exitosamente.\n")
+try:
+    df = pd.read_csv('data/processed/simulated_paint_formulas_with_engineered_features.csv')
+    print("Dataset cargado exitosamente.")
+except FileNotFoundError:
+    print("El archivo 'simulated_paint_formulas_with_engineered_features.csv' no fue encontrado en 'data/processed'.")
+    print("Asegúrate de que este archivo exista o de generar los datos primero.")
+    exit()
 
-# --- 2. Separación de Características (X) y Variable Objetivo (y) ---
-# Es fundamental separar las variables de entrada del modelo (X) de la variable
-# que queremos predecir (y) antes de cualquier preprocesamiento.
-TARGET_COLUMN = 'IsSuccess'
-X = df.drop(columns=[TARGET_COLUMN])
-y = df[TARGET_COLUMN]
-
+# --- Paso 2: Separación de Características y Variable Objetivo ---
+X = df.drop('IsSuccess', axis=1)
+y = df['IsSuccess']
 print(f"Dimensiones de X (Características): {X.shape}")
 print(f"Dimensiones de y (Variable Objetivo): {y.shape}")
-print("Variable objetivo identificada como 'IsSuccess'.\n")
+print(f"Variable objetivo identificada como 'IsSuccess'.")
 
-# --- 3. Identificación de Tipos de Columnas ---
-# Clasificamos las columnas como numéricas o categóricas para aplicar
-# los pasos de preprocesamiento adecuados a cada tipo.
+# Identificación de columnas numéricas y categóricas
 numerical_cols = X.select_dtypes(include=np.number).columns.tolist()
 categorical_cols = X.select_dtypes(include='object').columns.tolist()
+print(f"\nColumnas Numéricas ({len(numerical_cols)}): {numerical_cols}")
+print(f"Columnas Categóricas ({len(categorical_cols)}): {categorical_cols}")
 
-print(f"Columnas Numéricas ({len(numerical_cols)}): {numerical_cols}")
-print(f"Columnas Categóricas ({len(categorical_cols)}): {categorical_cols}\n")
 
-# --- 4. Manejo de Datos Faltantes (Imputación) ---
-# Rellenamos los valores nulos (NaNs) identificados en el EDA.
-# Para numéricas: Usamos la mediana, que es robusta a outliers.
-# Para categóricas: Usamos la moda ('most_frequent').
-
-print("Iniciando imputación de datos faltantes...")
-imputer_numerical = SimpleImputer(strategy='median')
-X[numerical_cols] = imputer_numerical.fit_transform(X[numerical_cols])
-
-imputer_categorical = SimpleImputer(strategy='most_frequent')
-X[categorical_cols] = imputer_categorical.fit_transform(X[categorical_cols])
+# --- Paso 3: Imputación de Datos Faltantes (si los hay) ---
+print("\nIniciando imputación de datos faltantes...")
+# Asumiendo imputación para columnas numéricas y categóricas
+for col in numerical_cols:
+    if X[col].isnull().any():
+        imputer_num = SimpleImputer(strategy='mean')
+        X[col] = imputer_num.fit_transform(X[[col]]).flatten() # <-- .flatten() añadido
+for col in categorical_cols:
+    if X[col].isnull().any():
+        imputer_cat = SimpleImputer(strategy='most_frequent')
+        X[col] = imputer_cat.fit_transform(X[[col]]).flatten() # <-- .flatten() añadido
 
 print("Imputación completada. Verificando NaNs restantes:")
-print(f"Número total de NaNs en X después de imputación: {X.isnull().sum().sum()}\n") # Debería ser 0
+print(f"Número total de NaNs en X después de imputación: {X.isnull().sum().sum()}\n")
 
-# --- 5. Codificación de Variables Categóricas (One-Hot Encoding) ---
-# Convertimos las variables categóricas a un formato numérico que los modelos
-# de Machine Learning puedan entender. One-Hot Encoding crea nuevas columnas binarias.
 
-print("Iniciando codificación One-Hot de variables categóricas...")
-encoder = OneHotEncoder(handle_unknown='ignore', sparse_output=False) # sparse_output=False para obtener un array denso
-
-# Ajustar y transformar las columnas categóricas
-X_encoded = encoder.fit_transform(X[categorical_cols])
-
-# Crear un DataFrame con las columnas codificadas y sus nombres apropiados
-X_encoded_df = pd.DataFrame(X_encoded, columns=encoder.get_feature_names_out(categorical_cols), index=X.index)
-
-# Concatenar las columnas numéricas originales (ahora imputadas) con las categóricas codificadas
-X_preprocessed = pd.concat([X[numerical_cols], X_encoded_df], axis=1)
-
-print(f"Dimensiones de X después de la codificación: {X_preprocessed.shape}")
-print("Codificación One-Hot completada. Primeras filas del DataFrame preprocesado:\n", X_preprocessed.head())
-print("\n")
-
-# --- 6. Escalado de Características Numéricas (StandardScaler) ---
-# Normalizamos las características numéricas para que tengan una media de 0 y desviación
-# estándar de 1. Esto es importante para algoritmos sensibles a la escala de las características.
-
-print("Iniciando escalado de características numéricas (StandardScaler)...")
-scaler = StandardScaler()
-X_preprocessed[numerical_cols] = scaler.fit_transform(X_preprocessed[numerical_cols])
-
-print("Escalado completado. Resumen estadístico de columnas numéricas escaladas (media ~0, std ~1):\n", X_preprocessed[numerical_cols].describe())
-print("Primeras filas del DataFrame preprocesado (valores numéricos escalados):\n", X_preprocessed.head())
-print("\n")
-
-# --- 7. División del Dataset (Entrenamiento y Prueba) ---
-# Dividimos el dataset en conjuntos de entrenamiento (para que el modelo aprenda)
-# y prueba (para evaluar el modelo con datos no vistos). Usamos stratify=y
-# para mantener la proporción de clases de 'IsSuccess' en ambos conjuntos.
-
-print("Dividiendo el dataset en conjuntos de entrenamiento y prueba (80/20)...")
-X_train, X_test, y_train, y_test = train_test_split(
-    X_preprocessed, y, test_size=0.20, random_state=42, stratify=y
+# --- Paso 4: Preprocesamiento de Características (Codificación One-Hot y Escalado) en el dataset COMPLETO ---
+# Creamos un ColumnTransformer para aplicar transformaciones diferentes a tipos de columnas diferentes
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', StandardScaler(), numerical_cols), # Escala las columnas numéricas
+        ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_cols) # Codifica las columnas categóricas
+    ],
+    remainder='passthrough' # Mantiene otras columnas que no estén especificadas (si las hubiera)
 )
+
+print("Iniciando aplicación del preprocesador al dataset completo X...")
+X_processed_full = preprocessor.fit_transform(X)
+
+# Convertir la matriz numpy resultante del ColumnTransformer a DataFrame
+# Primero, obtenemos los nombres de las columnas que saldrán del preprocesador
+ohe_feature_names = preprocessor.named_transformers_['cat'].get_feature_names_out(categorical_cols)
+all_feature_names = numerical_cols + list(ohe_feature_names) # Las numéricas mantienen su nombre
+
+X_processed_full = pd.DataFrame(X_processed_full, columns=all_feature_names, index=X.index)
+print("Preprocesamiento del dataset completo X completado.")
+print(f"Dimensiones de X_processed_full después de preprocesamiento: {X_processed_full.shape}")
+print("Primeras filas del DataFrame X_processed_full:")
+print(X_processed_full.head())
+
+
+# --- Paso 5: División en Conjuntos de Entrenamiento y Prueba (después del preprocesamiento completo) ---
+# Asegura una división estratificada para mantener la proporción de clases de 'IsSuccess'
+print("\nDividiendo el dataset preprocesado en conjuntos de entrenamiento y prueba (80/20)...")
+X_train, X_test, y_train, y_test = train_test_split(X_processed_full, y, test_size=0.2, random_state=42, stratify=y)
 
 print(f"Dimensiones de X_train: {X_train.shape}")
 print(f"Dimensiones de X_test: {X_test.shape}")
 print(f"Dimensiones de y_train: {y_train.shape}")
 print(f"Dimensiones de y_test: {y_test.shape}")
 
-print("\nProporción de Éxito en y_train antes de balanceo:")
-print(y_train.value_counts(normalize=True))
-print("\nProporción de Éxito en y_test:")
-print(y_test.value_counts(normalize=True))
-print("\n")
+print(f"\nProporción de Éxito en y_train antes de balanceo:\n{y_train.value_counts(normalize=True)}")
+print(f"\nProporción de Éxito en y_test:\n{y_test.value_counts(normalize=True)}")
 
-# --- 8. Manejo del Desbalance de Clases (SMOTE) ---
-# Aplicamos SMOTE para sobremuestrear la clase minoritaria ('IsSuccess') en el
-# conjunto de ENTRENAMIENTO solamente. Esto ayuda al modelo a aprender mejor
-# sobre la clase de interés sin introducir sesgos en la evaluación.
 
-print("Aplicando SMOTE para balancear las clases en el conjunto de ENTRENAMIENTO...")
+# --- Paso 6: Manejo del Desbalanceo con SMOTE (solo en el conjunto de entrenamiento) ---
+# Aplicamos SMOTE al conjunto de entrenamiento, X_train y y_train, que ya están preprocesados
+print("\nAplicando SMOTE para balancear las clases en el conjunto de ENTRENAMIENTO...")
 smote = SMOTE(random_state=42)
 X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
 
-print(f"Dimensiones de X_train después de SMOTE: {X_train_resampled.shape}")
-print(f"Dimensiones de y_train después de SMOTE: {y_train_resampled.shape}")
+print(f"Dimensiones de X_train_resampled después de SMOTE: {X_train_resampled.shape}")
+print(f"Dimensiones de y_train_resampled después de SMOTE: {y_train_resampled.shape}")
+print(f"\nProporción de Éxito en y_train_resampled (después de SMOTE):\n{y_train_resampled.value_counts(normalize=True)}")
+print("Balanceo de clases completado para el conjunto de entrenamiento.")
 
-print("\nProporción de Éxito en y_train_resampled (después de SMOTE):")
-print(y_train_resampled.value_counts(normalize=True))
-print("\nBalanceo de clases completado para el conjunto de entrenamiento.\n")
-
-print("--- Preprocesamiento de Datos Completo ---")
+print("\n--- Preprocesamiento de Datos Completo ---")
 print("El dataset está ahora listo para el entrenamiento del modelo de Machine Learning.")
 
-print("\n--- Guardando datos preprocesados para uso futuro ---")
-# Asegúrate de que la carpeta 'data/processed' exista
-import os
-output_dir = 'data/processed' # Ruta relativa desde scripts/preprocessing/
-os.makedirs(output_dir, exist_ok=True)
 
+# --- Guardando datos preprocesados para uso futuro ---
+print("\n--- Guardando datos preprocesados para uso futuro ---")
+
+output_dir = 'data/processed'
+os.makedirs(output_dir, exist_ok=True) # Crea la carpeta si no existe
+
+# Guarda los datos con SMOTE (para el modelo BASE)
 X_train_resampled.to_csv(os.path.join(output_dir, 'X_train_resampled.csv'), index=False)
 y_train_resampled.to_csv(os.path.join(output_dir, 'y_train_resampled.csv'), index=False)
+
+# Guarda los datos SIN SMOTE (para el pipeline de GridSearchCV)
+# Estas son las variables X_train y y_train RESULTANTES del train_test_split,
+# que ya están preprocesadas pero no sobremuestreadas.
+X_train.to_csv(os.path.join(output_dir, 'X_train_preprocessed.csv'), index=False) # Renombrado para claridad
+y_train.to_csv(os.path.join(output_dir, 'y_train.csv'), index=False)
+
+# Guarda el conjunto de prueba (ya preprocesado)
 X_test.to_csv(os.path.join(output_dir, 'X_test_preprocessed.csv'), index=False)
 y_test.to_csv(os.path.join(output_dir, 'y_test.csv'), index=False)
-print(f"Datos guardados exitosamente en: {output_dir}\n")
 
+print(f"Todos los datos de entrenamiento/prueba guardados exitosamente en: {output_dir}\n")
+
+# Guardar el objeto preprocesador para uso futuro (por ejemplo, para nuevas predicciones)
+# El preprocesador se ajusta sobre X_processed_full, no sobre X_train_processed
+joblib.dump(preprocessor, os.path.join('models', 'preprocessor.joblib'))
+print("Preprocesador guardado en 'models/preprocessor.joblib'")
+
+print("\n--- Proceso de Preprocesamiento Completado ---\n")
