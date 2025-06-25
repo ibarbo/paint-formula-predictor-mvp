@@ -68,6 +68,7 @@ grid_search_xgb = GridSearchCV(estimator=pipeline_xgb,
                                cv=5,
                                scoring='roc_auc',
                                verbose=2,
+                               tree_method='gpu_hist',
                                n_jobs=-1)
 
 print("Iniciando la búsqueda en la grilla de hiperparámetros (esto puede tomar un tiempo)...\n")

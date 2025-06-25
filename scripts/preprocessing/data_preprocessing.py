@@ -27,24 +27,48 @@ print(f"Dimensiones de X (Características): {X.shape}")
 print(f"Dimensiones de y (Variable Objetivo): {y.shape}")
 print(f"Variable objetivo identificada como 'IsSuccess'.")
 
-# Identificación de columnas numéricas y categóricas
-numerical_cols = X.select_dtypes(include=np.number).columns.tolist()
-categorical_cols = X.select_dtypes(include='object').columns.tolist()
-print(f"\nColumnas Numéricas ({len(numerical_cols)}): {numerical_cols}")
-print(f"Columnas Categóricas ({len(categorical_cols)}): {categorical_cols}")
+# -----------------------------------------------------------------------------------------
+# AHORA DEFINIMOS LAS COLUMNAS NUMÉRICAS Y CATEGÓRICAS DE MANERA EXPLÍCITA,
+# IGUAL QUE EN app.py, PARA GARANTIZAR CONSISTENCIA.
+# -----------------------------------------------------------------------------------------
+# Columnas categóricas (las que recibirán OneHotEncoder)
+categorical_features = [
+    'SubstrateType', 'ApplicationMethod', 'Biocide_Supplier', 'Coalescent_Supplier',
+    'Defoamer_Supplier', 'Dispersant_Supplier', 'HidingPower',
+    'PigmentSupplier', 'PigmentType', 'ResinSupplier', 'ResinType',
+    'SolventSupplier', 'SolventType', 'Surfactant_Supplier', 'Thickener_Supplier'
+]
 
+# Columnas numéricas (las que recibirán StandardScaler)
+numerical_features = [
+    'ResinPercentage', 'PigmentPercentage', 'SolventPercentage', 'AdditivePercentage',
+    'ApplicationTemp_C', 'Humidity', 'PHLevel', 'Viscosity', 'DryingTime_Hours',
+    'Coverage', 'Gloss', 'Biocide_Percentage', 'Coalescent_Percentage',
+    'Defoamer_Percentage', 'Dispersant_Percentage', 'EstimatedDensity',
+    'ResinToPigmentRatio', 'ResinToSolventRatio', 'PigmentToSolventRatio',
+    'Surfactant_Percentage', 'Thickener_Percentage', 'TotalAdditivesPercentage',
+    'AcrylicOnWood', 'EpoxyOnMetal', 'HighDryingTime', 'LowApplicationTemp', 'TiO2OnConcrete'
+]
+
+# Asegurarse de que X solo contenga las columnas esperadas en el orden correcto
+# Esto es CRÍTICO para que el preprocesador se ajuste correctamente
+all_expected_features = numerical_features + categorical_features
+X = X[all_expected_features] # Filtrar y ordenar X antes de la imputación y el preprocesamiento
+
+print(f"\nColumnas Numéricas ({len(numerical_features)}): {numerical_features}")
+print(f"Columnas Categóricas ({len(categorical_features)}): {categorical_features}")
 
 # --- Paso 3: Imputación de Datos Faltantes (si los hay) ---
 print("\nIniciando imputación de datos faltantes...")
 # Asumiendo imputación para columnas numéricas y categóricas
-for col in numerical_cols:
+for col in numerical_features: # Usar numerical_features explícitas
     if X[col].isnull().any():
         imputer_num = SimpleImputer(strategy='mean')
-        X[col] = imputer_num.fit_transform(X[[col]]).flatten() # <-- .flatten() añadido
-for col in categorical_cols:
+        X[col] = imputer_num.fit_transform(X[[col]]).flatten()
+for col in categorical_features: # Usar categorical_features explícitas
     if X[col].isnull().any():
         imputer_cat = SimpleImputer(strategy='most_frequent')
-        X[col] = imputer_cat.fit_transform(X[[col]]).flatten() # <-- .flatten() añadido
+        X[col] = imputer_cat.fit_transform(X[[col]]).flatten()
 
 print("Imputación completada. Verificando NaNs restantes:")
 print(f"Número total de NaNs en X después de imputación: {X.isnull().sum().sum()}\n")
@@ -54,21 +78,23 @@ print(f"Número total de NaNs en X después de imputación: {X.isnull().sum().su
 # Creamos un ColumnTransformer para aplicar transformaciones diferentes a tipos de columnas diferentes
 preprocessor = ColumnTransformer(
     transformers=[
-        ('num', StandardScaler(), numerical_cols), # Escala las columnas numéricas
-        ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_cols) # Codifica las columnas categóricas
+        ('num', StandardScaler(), numerical_features), # Escala las columnas numéricas
+        ('cat', OneHotEncoder(handle_unknown='ignore', sparse_output=False), categorical_features) # Codifica las columnas categóricas
     ],
     remainder='passthrough' # Mantiene otras columnas que no estén especificadas (si las hubiera)
 )
 
 print("Iniciando aplicación del preprocesador al dataset completo X...")
-X_processed_full = preprocessor.fit_transform(X)
+# Asegúrate de ajustar el preprocesador sobre las columnas correctas en el orden correcto
+X_processed_full = preprocessor.fit_transform(X[all_expected_features])
 
 # Convertir la matriz numpy resultante del ColumnTransformer a DataFrame
 # Primero, obtenemos los nombres de las columnas que saldrán del preprocesador
-ohe_feature_names = preprocessor.named_transformers_['cat'].get_feature_names_out(categorical_cols)
-all_feature_names = numerical_cols + list(ohe_feature_names) # Las numéricas mantienen su nombre
+ohe_feature_names = preprocessor.named_transformers_['cat'].get_feature_names_out(categorical_features)
+# El orden aquí es crucial: primero las numéricas escaladas, luego las one-hot
+all_transformed_feature_names = numerical_features + list(ohe_feature_names)
 
-X_processed_full = pd.DataFrame(X_processed_full, columns=all_feature_names, index=X.index)
+X_processed_full = pd.DataFrame(X_processed_full, columns=all_transformed_feature_names, index=X.index)
 print("Preprocesamiento del dataset completo X completado.")
 print(f"Dimensiones de X_processed_full después de preprocesamiento: {X_processed_full.shape}")
 print("Primeras filas del DataFrame X_processed_full:")
@@ -127,8 +153,7 @@ y_test.to_csv(os.path.join(output_dir, 'y_test.csv'), index=False)
 print(f"Todos los datos de entrenamiento/prueba guardados exitosamente en: {output_dir}\n")
 
 # Guardar el objeto preprocesador para uso futuro (por ejemplo, para nuevas predicciones)
-# El preprocesador se ajusta sobre X_processed_full, no sobre X_train_processed
-joblib.dump(preprocessor, os.path.join('models', 'preprocessor.joblib'))
-print("Preprocesador guardado en 'models/preprocessor.joblib'")
+joblib.dump(preprocessor, os.path.join('models', 'simple_shap_model', 'simple_preprocessor.joblib')) # Ajusta la ruta aquí
+print("Preprocesador guardado en 'models/simple_shap_model/simple_preprocessor.joblib'")
 
 print("\n--- Proceso de Preprocesamiento Completado ---\n")
